@@ -13,7 +13,6 @@ import { Result, ResultAsync, err, ok } from 'neverthrow';
  * @param {Headers} params.request.headers - The request headers.
  * @param {URL} params.request.url - The request URL.
  * @param {string} params.request.method - The HTTP method (e.g., 'GET', 'POST').
- * @param {(ArrayBuffer|ArrayBufferView|null)=} params.request.body - The optional request body.
  * @param {function({signatureBase: string, params: Object.<string, unknown>, ok: import("neverthrow").ok, err: import("neverthrow").err}): Promise<import("neverthrow").Result<ArrayBuffer, {type: string, message: string, context?: unknown}>>} params.sign - An asynchronous function that signs the signature base. It takes an object with `signatureBase`, `params`, `ok` (neverthrow's `ok` function), and `err` (neverthrow's `err` function) and returns a Promise resolving to a `neverthrow.Result` where `Ok` is `ArrayBuffer` and `Err` is an error object.
  * @returns {Promise<import("neverthrow").Result<{signatureInput: string, signature: string, signatureBase: string}, {type: string, message: string, context?: unknown}>>} A Promise that resolves to a `neverthrow.Result`. If successful (`Ok`), it contains an object with `signatureInput`, `signature`, and `signatureBase` (all strings). If an error occurs (`Err`), it contains an object with `type`, `message`, and an optional `context`.
  */
