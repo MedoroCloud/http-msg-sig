@@ -5,6 +5,11 @@
   "main": "src/index.js",
   "types": "types/index.d.ts",
   "license": "MIT",
+  "homepage": "https://github.com/raeesbhatti/http-msg-sig",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/raeesbhatti/http-msg-sig.git"
+  },
   "scripts": {
     "types": "tsc",
     "test": "node --test tests",
