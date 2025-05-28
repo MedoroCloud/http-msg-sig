@@ -1,6 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
 import { createSignatureForRequest, verifySignatureOfRequest } from '../src/index.js';
+import { ok, err } from 'neverthrow';
 
 describe('verifySignatureOfRequest (Unit Tests)', () => {
     it('should successfully verify a valid signature', async () => {
@@ -11,16 +12,13 @@ describe('verifySignatureOfRequest (Unit Tests)', () => {
             body: null,
         };
 
-        const signatureInputs = ['@method', '@target-uri', 'content-type'];
-        const signatureLabel = 'sig1';
         const nowInSeconds = Math.floor(Date.now() / 1000);
-        const additionalParams = { keyid: 'test-key-id', created: nowInSeconds };
 
         // First, create a valid signature using createSignatureForRequest
         const createResult = await createSignatureForRequest({
-            signatureInputs,
-            signatureLabel,
-            additionalParams,
+            signatureInputs: ['@method', '@target-uri', 'content-type'],
+            signatureLabel: 'sig1',
+            additionalParams: { keyid: 'test-key-id', created: nowInSeconds },
             request,
             sign: async ({ ok }) => {
                 // For this test, we'll use a fixed signature for predictability
@@ -29,13 +27,13 @@ describe('verifySignatureOfRequest (Unit Tests)', () => {
         });
 
         assert(createResult.isOk());
-        const { signatureInput, signature, signatureBase } = createResult._unsafeUnwrap();
+        const { signatureInput, signature, signatureBase } = createResult.value;
 
         // Now, verify the signature using verifySignatureOfRequest
         const verifyResult = await verifySignatureOfRequest({
             stringOfSignatureInputDictionary: signatureInput,
             stringOfSignatureDictionary: signature,
-            signatureLabel,
+            signatureLabel: 'sig1',
             requiredInputs: ['@method', '@target-uri', 'content-type'],
             requiredParams: ['keyid', 'created'],
             maxAge: 300, // 5 minutes
@@ -47,8 +45,7 @@ describe('verifySignatureOfRequest (Unit Tests)', () => {
             },
         });
 
-        assert(verifyResult.isOk());
-        assert.deepStrictEqual(verifyResult._unsafeUnwrap(), true);
+        assert.deepStrictEqual(verifyResult, ok(true));
     });
 
     it('should return an error for invalid stringOfSignatureInputDictionary', async () => {
@@ -70,10 +67,11 @@ describe('verifySignatureOfRequest (Unit Tests)', () => {
             verify: async ({ ok }) => ok(true),
         });
 
-        assert(verifyResult.isErr());
-        const err = verifyResult._unsafeUnwrapErr();
-        assert.deepStrictEqual(err.type, 'validation');
-        assert.deepStrictEqual(err.message, 'Invalid signature input');
+        assert.deepStrictEqual(verifyResult, err({
+            type: 'validation',
+            message: 'Invalid signature input',
+            context: 'Signature Input is not a dictionary or does not contain "sig1" field',
+        }));
     });
 
     it('should return an error for invalid stringOfSignatureDictionary', async () => {
@@ -95,10 +93,11 @@ describe('verifySignatureOfRequest (Unit Tests)', () => {
             verify: async ({ ok }) => ok(true),
         });
 
-        assert(verifyResult.isErr());
-        const err = verifyResult._unsafeUnwrapErr();
-        assert.deepStrictEqual(err.type, 'validation');
-        assert.deepStrictEqual(err.message, 'Invalid signature');
+        assert.deepStrictEqual(verifyResult, err({
+            type: 'validation',
+            message: 'Invalid signature',
+            context: 'Signature is not a dictionary or does not contain "sig1" field',
+        }));
     });
 
     it('should return an error if signatureLabel in input dictionary does not match provided signatureLabel', async () => {
@@ -120,10 +119,11 @@ describe('verifySignatureOfRequest (Unit Tests)', () => {
             verify: async ({ ok }) => ok(true),
         });
 
-        assert(verifyResult.isErr());
-        const err = verifyResult._unsafeUnwrapErr();
-        assert.deepStrictEqual(err.type, 'validation');
-        assert.deepStrictEqual(err.message, 'Invalid signature input');
+        assert.deepStrictEqual(verifyResult, err({
+            type: 'validation',
+            message: 'Invalid signature input',
+            context: 'Signature Input is not a dictionary or does not contain "sig1" field',
+        }));
     });
 
     it('should return an error if a required input is missing from the request', async () => {
@@ -145,10 +145,11 @@ describe('verifySignatureOfRequest (Unit Tests)', () => {
             verify: async ({ ok }) => ok(true),
         });
 
-        assert(verifyResult.isErr());
-        const err = verifyResult._unsafeUnwrapErr();
-        assert.deepStrictEqual(err.type, 'validation');
-        assert.deepStrictEqual(err.message, 'Invalid signature');
+        assert.deepStrictEqual(verifyResult, err({
+            type: 'validation',
+            message: 'Invalid signature',
+            context: 'Missing required input field "x-custom-header" in signature input',
+        }));
     });
 
     it('should return an error if a required parameter is missing from the signature input', async () => {
@@ -170,10 +171,11 @@ describe('verifySignatureOfRequest (Unit Tests)', () => {
             verify: async ({ ok }) => ok(true),
         });
 
-        assert(verifyResult.isErr());
-        const err = verifyResult._unsafeUnwrapErr();
-        assert.deepStrictEqual(err.type, 'validation');
-        assert.deepStrictEqual(err.message, 'Invalid signature');
+        assert.deepStrictEqual(verifyResult, err({
+            type: 'validation',
+            message: 'Invalid signature',
+            context: 'Missing required parameter "created" in signature input',
+        }));
     });
 
     it('should return an error if the created timestamp is too old (maxAge exceeded)', async () => {
@@ -198,10 +200,11 @@ describe('verifySignatureOfRequest (Unit Tests)', () => {
             verify: async ({ ok }) => ok(true),
         });
 
-        assert(verifyResult.isErr());
-        const err = verifyResult._unsafeUnwrapErr();
-        assert.deepStrictEqual(err.type, 'validation');
-        assert.deepStrictEqual(err.context, 'Signature expired');
+        assert.deepStrictEqual(verifyResult, err({
+            type: 'validation',
+            message: 'Signature expired',
+            context: 'Signature expired',
+        }));
     });
 
     it('should return an error if content-digest is in signature input but header is missing', async () => {
@@ -223,10 +226,11 @@ describe('verifySignatureOfRequest (Unit Tests)', () => {
             verify: async ({ ok }) => ok(true),
         });
 
-        assert(verifyResult.isErr());
-        const err = verifyResult._unsafeUnwrapErr();
-        assert.deepStrictEqual(err.type, 'validation');
-        assert.deepStrictEqual(err.context, 'Missing required header "content-digest"');
+        assert.deepStrictEqual(verifyResult, err({
+            type: 'validation',
+            message: 'Invalid signature',
+            context: 'Missing required header "content-digest"',
+        }));
     });
 
     it('should return an error if content-digest header specifies an unsupported algorithm', async () => {
@@ -248,10 +252,11 @@ describe('verifySignatureOfRequest (Unit Tests)', () => {
             verify: async ({ ok }) => ok(true),
         });
 
-        assert(verifyResult.isErr());
-        const err = verifyResult._unsafeUnwrapErr();
-        assert.deepStrictEqual(err.type, 'validation');
-        assert.deepStrictEqual(err.message, 'Unsupported content-digest algorithm: md5');
+        assert.deepStrictEqual(verifyResult, err({
+            type: 'validation',
+            message: 'Unsupported content-digest algorithm: md5',
+            context: 'Unsupported content-digest algorithm: md5',
+        }));
     });
 
     it('should return an error if content-digest does not match the body', async () => {
@@ -276,10 +281,11 @@ describe('verifySignatureOfRequest (Unit Tests)', () => {
             verify: async ({ ok }) => ok(true),
         });
 
-        assert(verifyResult.isErr());
-        const err = verifyResult._unsafeUnwrapErr();
-        assert.deepStrictEqual(err.type, 'validation');
-        assert.deepStrictEqual(err.message, 'Invalid digest for algorithm sha-256');
+        assert.deepStrictEqual(verifyResult, err({
+            type: 'validation',
+            message: 'Invalid digest for algorithm sha-256',
+            context: 'Invalid digest for algorithm sha-256',
+        }));
     });
 
     it('should return an error if @query-param is missing the name parameter', async () => {
@@ -303,10 +309,11 @@ describe('verifySignatureOfRequest (Unit Tests)', () => {
             verify: async ({ ok }) => ok(true),
         });
 
-        assert(verifyResult.isErr());
-        const err = verifyResult._unsafeUnwrapErr();
-        assert.deepStrictEqual(err.type, 'validation');
-        assert.deepStrictEqual(err.context, 'Signature input is missing required parameter "name" in signature input for field "@query-param"');
+        assert.deepStrictEqual(verifyResult, err({
+            type: 'validation',
+            message: 'Invalid signature input',
+            context: 'Signature input is missing required parameter "name" in signature input for field "@query-param"',
+        }));
     });
 
     it('should return an error if a required query parameter is missing from the URL', async () => {
@@ -330,10 +337,11 @@ describe('verifySignatureOfRequest (Unit Tests)', () => {
             verify: async ({ ok }) => ok(true),
         });
 
-        assert(verifyResult.isErr());
-        const err = verifyResult._unsafeUnwrapErr();
-        assert.deepStrictEqual(err.type, 'validation');
-        assert.deepStrictEqual(err.context, 'Request is missing query parameter "param2" required in signature input for field "@query-param";name="param2"');
+        assert.deepStrictEqual(verifyResult, err({
+            type: 'validation',
+            message: 'Missing query parameter: param2',
+            context: 'Request is missing query parameter "param2" required in signature input for field "@query-param";name="param2"',
+        }));
     });
 
     it('should return an error if a required header is missing from the request', async () => {
@@ -357,10 +365,11 @@ describe('verifySignatureOfRequest (Unit Tests)', () => {
             verify: async ({ ok }) => ok(true),
         });
 
-        assert(verifyResult.isErr());
-        const err = verifyResult._unsafeUnwrapErr();
-        assert.deepStrictEqual(err.type, 'validation');
-        assert.deepStrictEqual(err.context, 'Request is missing header "x-custom-header" required in signature input for field "x-custom-header"');
+        assert.deepStrictEqual(verifyResult, err({
+            type: 'validation',
+            message: 'Missing header: x-custom-header',
+            context: 'Request is missing header "x-custom-header" required in signature input for field "x-custom-header"',
+        }));
     });
 
     it('should return an error if the created parameter is missing from the signature input', async () => {
@@ -385,10 +394,11 @@ describe('verifySignatureOfRequest (Unit Tests)', () => {
             verify: async ({ ok }) => ok(true),
         });
 
-        assert(verifyResult.isErr());
-        const err = verifyResult._unsafeUnwrapErr();
-        assert.deepStrictEqual(err.type, 'validation');
-        assert.deepStrictEqual(err.context, 'Missing required parameter "created" in signature input');
+        assert.deepStrictEqual(verifyResult, err({
+            type: 'validation',
+            message: 'Invalid signature',
+            context: 'Missing required parameter "created" in signature input',
+        }));
     });
 
     it('should return an error if the created parameter is not a number', async () => {
@@ -413,10 +423,11 @@ describe('verifySignatureOfRequest (Unit Tests)', () => {
             verify: async ({ ok }) => ok(true),
         });
 
-        assert(verifyResult.isErr());
-        const err = verifyResult._unsafeUnwrapErr();
-        assert.deepStrictEqual(err.type, 'validation');
-        assert.deepStrictEqual(err.context, 'Invalid parameter "created" in signature input');
+        assert.deepStrictEqual(verifyResult, err({
+            type: 'validation',
+            message: 'Invalid signature',
+            context: 'Invalid parameter "created" in signature input',
+        }));
     });
 
     it('should correctly generate signature base with all standard @ prefixed parameters', async () => {
@@ -440,6 +451,6 @@ describe('verifySignatureOfRequest (Unit Tests)', () => {
             verify: async ({ ok }) => ok(true),
         });
     
-        assert(verifyResult.isOk());
+        assert.deepStrictEqual(verifyResult, ok(true));
     });
 });

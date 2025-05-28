@@ -323,7 +323,7 @@ export async function verifySignatureOfRequest({
     if ((nowInSeconds - paramCreated) > maxAge) {
         return err({
             type: 'validation',
-            message: 'Invalid signature',
+            message: 'Signature expired',
             context: 'Signature expired'
         });
     }

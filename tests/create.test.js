@@ -9,7 +9,6 @@ describe('createSignatureForRequest (Unit Tests)', () => {
             headers: new Headers({ 'Content-Type': 'application/json' }),
             url: new URL('https://example.com/foo?bar=baz'),
             method: 'POST',
-            body: null,
         };
 
         const nowInSeconds = Math.floor(Date.now() / 1000);
@@ -43,7 +42,6 @@ describe('createSignatureForRequest (Unit Tests)', () => {
             headers: new Headers(),
             url: new URL('https://example.com/path?param1=value1&param2=value2'),
             method: 'GET',
-            body: null,
         };
 
         const nowInSeconds = Math.floor(Date.now() / 1000);
@@ -75,7 +73,6 @@ describe('createSignatureForRequest (Unit Tests)', () => {
             headers: new Headers(), // Missing 'Content-Type'
             url: new URL('https://example.com/foo'),
             method: 'POST',
-            body: null,
         };
 
         const nowInSeconds = Math.floor(Date.now() / 1000);
@@ -102,7 +99,6 @@ describe('createSignatureForRequest (Unit Tests)', () => {
             headers: new Headers(),
             url: new URL('https://user:pass@sub.example.com:8080/path/to/file?query=string#hash'),
             method: 'GET',
-            body: null,
         };
 
         const nowInSeconds = Math.floor(Date.now() / 1000);
@@ -136,7 +132,6 @@ describe('createSignatureForRequest (Unit Tests)', () => {
             headers: new Headers(),
             url: new URL('https://example.com/path'), // No query string
             method: 'GET',
-            body: null,
         };
 
         const nowInSeconds = Math.floor(Date.now() / 1000);
@@ -167,7 +162,6 @@ describe('createSignatureForRequest (Unit Tests)', () => {
             headers: new Headers(),
             url: new URL('https://example.com/foo?param1=value1'),
             method: 'GET',
-            body: null,
         };
 
         const nowInSeconds = Math.floor(Date.now() / 1000);
@@ -192,7 +186,6 @@ describe('createSignatureForRequest (Unit Tests)', () => {
             headers: new Headers(),
             url: new URL('https://example.com/foo?param1=value1'),
             method: 'GET',
-            body: null,
         };
         const nowInSeconds = Math.floor(Date.now() / 1000);
 
@@ -216,7 +209,6 @@ describe('createSignatureForRequest (Unit Tests)', () => {
             headers: new Headers(),
             url: new URL('https://example.com/foo'),
             method: 'POST',
-            body: null,
         };
 
         const nowInSeconds = Math.floor(Date.now() / 1000);
@@ -240,7 +232,6 @@ describe('createSignatureForRequest (Unit Tests)', () => {
             headers: new Headers(),
             url: new URL('https://example.com/foo'),
             method: 'POST',
-            body: null,
         };
 
         const nowInSeconds = Math.floor(Date.now() / 1000);
