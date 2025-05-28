@@ -1,0 +1,21 @@
+{
+  "name": "http-msg-sig",
+  "version": "0.8.0",
+  "type": "module",
+  "main": "src/index.js",
+  "types": "types/index.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "types": "tsc",
+    "test": "node --test tests",
+    "coverage": "node --test tests --experimental-test-coverage"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.21",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "neverthrow": "^8.2.0",
+    "structured-field-values": "^2.0.4"
+  }
+}
