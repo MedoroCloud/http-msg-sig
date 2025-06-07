@@ -84,7 +84,6 @@ To verify an HTTP message signature, you need the original request details, the 
 
 ```ts
 import { verifySignatureOfRequest } from 'http-msg-sig';
-import { ok, err } from 'neverthrow';
 
 async function exampleVerifySignature() {
     const request = {
@@ -101,7 +100,13 @@ async function exampleVerifySignature() {
     };
 
     // Your custom verification function (e.g., using a public key)
-    const verifyFunction = async ({ signatureBase, params, signature }) => {
+    const verifyFunction = async ({ signatureBase, params, signature, ok, err }: {
+        signatureBase: string;
+        params: Record<string, unknown>;
+        signature: ArrayBuffer;
+        ok: <T>(value: T) => Result<T, never>;
+        err: <E>(error: E) => Result<never, E>;
+    }) => {
         // In a real application, you would use a cryptographic library here
         // and verify the signature against the signatureBase and a public key
         // For demonstration, we'll just return true
