@@ -103,7 +103,7 @@ async function exampleVerifySignature() {
     const verifyFunction = async ({ signatureBase, params, signature, ok, err }: {
         signatureBase: string;
         params: Record<string, unknown>;
-        signature: ArrayBuffer;
+        signature: Uint8Array;
         ok: <T>(value: T) => Result<T, never>;
         err: <E>(error: E) => Result<never, E>;
     }) => {
