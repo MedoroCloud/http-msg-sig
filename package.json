@@ -5,10 +5,13 @@
   "main": "src/index.js",
   "types": "types/index.d.ts",
   "license": "MIT",
-  "homepage": "https://github.com/raeesbhatti/http-msg-sig",
+  "homepage": "https://github.com/MedoroCloud/http-msg-sig",
   "repository": {
     "type": "git",
-    "url": "https://github.com/RaeesBhatti/http-msg-sig"
+    "url": "git+https://github.com/MedoroCloud/http-msg-sig.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MedoroCloud/http-msg-sig/issues"
   },
   "scripts": {
     "types": "tsc",
